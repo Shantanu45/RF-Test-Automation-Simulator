@@ -1,0 +1,9 @@
+from typing import Any, Protocol
+
+
+class RunRepository(Protocol):
+    def save(self, document: dict[str, Any]) -> None: ...
+
+    def load(self, run_id: str) -> dict[str, Any]: ...
+
+    def close(self) -> None: ...

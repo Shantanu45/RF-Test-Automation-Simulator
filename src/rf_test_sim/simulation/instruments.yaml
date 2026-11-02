@@ -1,0 +1,74 @@
+spec: "1.0"
+devices:
+  generator:
+    eom:
+      TCPIP INSTR:
+        q: "\n"
+        r: "\n"
+    error: ERROR
+    dialogues:
+      - q: "*IDN?"
+        r: "RF-SIM,GENERATOR,SG001,1.0"
+    properties:
+      frequency:
+        default: 1000000000.0
+        getter: {q: "FREQ?", r: "{:.12g}"}
+        setter: {q: "FREQ {:g}", r: OK}
+        specs: {min: 1, max: 1000000000000, type: float}
+      power:
+        default: -30.0
+        getter: {q: "POW?", r: "{:.12g}"}
+        setter: {q: "POW {:g}", r: OK}
+        specs: {min: -200, max: 100, type: float}
+      output:
+        default: 0
+        getter: {q: "OUTP?", r: "{:d}"}
+        setter: {q: "OUTP {:d}", r: OK}
+        specs: {valid: [0, 1], type: int}
+  analyzer:
+    eom:
+      TCPIP INSTR:
+        q: "\n"
+        r: "\n"
+    error: ERROR
+    dialogues:
+      - q: "*IDN?"
+        r: "RF-SIM,ANALYZER,SA001,1.0"
+      - q: INIT
+        r: OK
+      - q: "*OPC?"
+        r: "1"
+    properties:
+      center:
+        default: 1000000000.0
+        getter: {q: "FREQ:CENT?", r: "{:.12g}"}
+        setter: {q: "FREQ:CENT {:g}", r: OK}
+        specs: {min: 1, max: 1000000000000, type: float}
+      span:
+        default: 10000000.0
+        getter: {q: "FREQ:SPAN?", r: "{:.12g}"}
+        setter: {q: "FREQ:SPAN {:g}", r: OK}
+        specs: {min: 0.000001, max: 1000000000000, type: float}
+      bandwidth:
+        default: 1000000.0
+        getter: {q: "BAND?", r: "{:.12g}"}
+        setter: {q: "BAND {:g}", r: OK}
+        specs: {min: 0.000001, max: 1000000000000, type: float}
+      carrier:
+        default: -200.0
+        getter: {q: "READ:CARR?", r: "{:.12g}"}
+        setter: {q: "SIM:CARR {:g}", r: OK}
+        specs: {type: float}
+      noise:
+        default: -200.0
+        getter: {q: "READ:NOISE?", r: "{:.12g}"}
+        setter: {q: "SIM:NOISE {:g}", r: OK}
+        specs: {type: float}
+      valid:
+        default: 0
+        getter: {q: "READ:VALID?", r: "{:d}"}
+        setter: {q: "SIM:VALID {:d}", r: OK}
+        specs: {valid: [0, 1], type: int}
+resources:
+  TCPIP::generator::INSTR: {device: generator}
+  TCPIP::analyzer::INSTR: {device: analyzer}

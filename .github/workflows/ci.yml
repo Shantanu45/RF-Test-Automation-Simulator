@@ -1,0 +1,48 @@
+name: Verify RF simulator
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  python:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.12", "3.13"]
+    runs-on: ${{ matrix.os }}
+    env:
+      CHECK_OUTPUT: artifacts
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install -c requirements.lock '.[dev]'
+      - run: python scripts/check.py
+      - run: python -m build
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: python-${{ matrix.os }}-${{ matrix.python }}
+          path: |
+            artifacts/
+            dist/
+
+  compose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: mkdir -p artifacts && chmod 777 artifacts
+      - run: docker compose --profile test config --quiet
+      - run: docker compose --profile test build tests simulator
+      - run: docker compose --profile test run --rm tests
+      - run: docker compose run --rm simulator
+      - name: Capture service logs
+        if: always()
+        run: docker compose --profile test logs --no-color > artifacts/compose.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: compose-results
+          path: artifacts/
+      - if: always()
+        run: docker compose --profile test down --volumes

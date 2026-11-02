@@ -1,0 +1,31 @@
+dut_id: DEMO-AMP-001
+frequencies_hz: [900000000, 1000000000, 1100000000]
+powers_dbm: [-30, -20]
+bandwidth_hz: 1000000
+span_hz: 10000000
+model:
+  gain_db: 20
+  noise_figure_db: 5
+  frequency_min_hz: 100000000
+  frequency_max_hz: 6000000000
+  input_min_dbm: -80
+  input_max_dbm: -10
+  input_loss_db: 0
+  output_loss_db: 0
+  temperature_k: 290
+  source_temperature_k: 290
+  analyzer_noise_dbm_hz: null
+gain_limit:
+  lower: 19
+  upper: 21
+  guard_band: 0
+snr_limit:
+  lower: 70
+  upper: null
+  guard_band: 0
+visa:
+  generator_resource: TCPIP::generator::INSTR
+  analyzer_resource: TCPIP::analyzer::INSTR
+  timeout_ms: 2000
+  read_termination: "\n"
+  write_termination: "\n"

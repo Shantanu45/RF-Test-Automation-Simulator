@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools==77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rf-test-sim"
+version = "0.1.0"
+description = "Deterministic RF acceptance testing with PyVISA-sim"
+requires-python = ">=3.12,<3.14"
+dependencies = [
+    "PyVISA==1.15.0", "PyVISA-sim==0.7.1", "pymongo==4.11.3",
+    "PyYAML==6.0.2", "Jinja2==3.1.6",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==8.3.5", "pytest-cov==6.0.0", "ruff==0.11.2",
+    "mypy==1.15.0", "types-PyYAML==6.0.12.20241230", "build==1.2.2.post1",
+]
+
+[project.scripts]
+rf-test = "rf_test_sim.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+rf_test_sim = ["simulation/*.yaml", "reporting/templates/*.html"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--strict-markers --strict-config -ra"
+markers = [
+    "unit: isolated software tests", "sim: real PyVISA-sim integration",
+    "mongo: requires TEST_MONGODB_URI and a disposable database",
+    "acceptance: executable DUT acceptance scenarios",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I", "UP", "B"]
+
+[tool.mypy]
+python_version = "3.12"
+files = ["src"]
+check_untyped_defs = true
+disallow_untyped_defs = true
+warn_unused_ignores = true
+
+[[tool.mypy.overrides]]
+module = ["pyvisa.*"]
+ignore_missing_imports = true

@@ -1,0 +1,65 @@
+services:
+  mongo:
+    image: mongo:8.0.6
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    networks: [database]
+    healthcheck:
+      test: [CMD, mongosh, --quiet, --eval, "quit(db.adminCommand('ping').ok ? 0 : 1)"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+  simulator:
+    build:
+      context: .
+      target: runtime
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      MONGODB_URI: mongodb://mongo:27017
+      MONGODB_DATABASE: rf_sim
+    volumes:
+      - ./artifacts:/artifacts
+      - ./configs:/app/configs:ro
+    networks: [database]
+    init: true
+
+  tests:
+    profiles: [test]
+    build:
+      context: .
+      target: test
+    depends_on:
+      mongo-test:
+        condition: service_healthy
+    environment:
+      TEST_MONGODB_URI: mongodb://mongo-test:27017
+    volumes:
+      - ./artifacts:/artifacts
+    networks: [testing]
+    init: true
+
+  mongo-test:
+    profiles: [test]
+    image: mongo:8.0.6
+    tmpfs:
+      - /data/db
+    networks: [testing]
+    healthcheck:
+      test: [CMD, mongosh, --quiet, --eval, "quit(db.adminCommand('ping').ok ? 0 : 1)"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  mongo-data:
+
+networks:
+  database:
+    internal: true
+  testing:
+    internal: true
