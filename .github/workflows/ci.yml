@@ -39,6 +39,10 @@ jobs:
       - name: Capture service logs
         if: always()
         run: docker compose --profile test logs --no-color > artifacts/compose.log
+      - name: Make container artifacts readable for upload
+        if: always()
+        # Atomic writes create mode-0600 files owned by container UID 10001.
+        run: sudo chmod -R a+rX artifacts
       - uses: actions/upload-artifact@v4
         if: always()
         with:
