@@ -1,3 +1,4 @@
+"""Think of it as the person operating the laboratory equipment: connecting instruments, choosing settings, taking readings, and switching everything off afterward"""
 import logging
 import shutil
 import tempfile
@@ -19,11 +20,17 @@ from rf_test_sim.simulation.control import SimulationControl
 
 logger = logging.getLogger(__name__)
 
-
+"""
+Configures the signal generator
+Configures the spectrum analyzer
+Uses rf_model.py to predict the signal and noise
+Returns the analyzer readings
+"""
 class SimulationBench:
+    #It stores the configuration and prepares cleanup trackin
     def __init__(self, config: RunConfig) -> None:
         self.config = config
-        self._stack = ExitStack()
+        self._stack = ExitStack()       #ExitStack is a cleanup organizer
         self._closed = False
         self._output_disable_attempted = False
         self._cleanup_errors: list[dict[str, str]] = []
@@ -89,10 +96,12 @@ class SimulationBench:
         except Exception as error:
             self._cleanup_errors.append({"type": type(error).__name__, "message": "RF off failed"})
 
+    #identify the instruments
     @property
     def identities(self) -> dict[str, str]:
         return {"generator": self.generator.identity, "analyzer": self.analyzer.identity}
 
+    #take a reading using the current settings
     def acquire(self) -> Observation:
         if self._closed:
             raise InstrumentError("bench is closed")
@@ -101,6 +110,8 @@ class SimulationBench:
         center, span, bandwidth = self.analyzer.settings()
         if abs(frequency - center) > span / 2:
             raise InstrumentError("carrier outside analyzer span")
+
+        #Calculate the simulated physical response
         reading = simulate(self.config.model, frequency, power, bandwidth, enabled)
         self.control.load(reading)
         self.analyzer.trigger()
@@ -114,6 +125,7 @@ class SimulationBench:
             None if carrier is not None else "generator RF output is disabled",
         )
 
+    #perform a measurement at requested settings
     def measure(self, frequency_hz: float, power_dbm: float) -> Observation:
         if self._closed:
             raise InstrumentError("bench is closed")
