@@ -19,8 +19,12 @@ class ScpiInstrument:
             response = self.resource.query(command).strip()
         except VisaIOError as error:
             if error.error_code == constants.StatusCode.error_timeout:
-                raise InstrumentTimeout(f"timeout during {command.split()[0]}") from error
-            raise InstrumentError(f"VISA failure during {command.split()[0]}") from error
+                raise InstrumentTimeout(
+                    f"timeout during {command.split()[0]}"
+                ) from error
+            raise InstrumentError(
+                f"VISA failure during {command.split()[0]}"
+            ) from error
         if not response or response == "ERROR":
             raise InstrumentError(f"invalid response to {command.split()[0]}")
         return response

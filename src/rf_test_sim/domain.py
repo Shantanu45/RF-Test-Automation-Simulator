@@ -11,7 +11,9 @@ from rf_test_sim.errors import ConfigurationError
 def finite(name: str, value: float) -> None:
     try:
         valid = (
-            not isinstance(value, bool) and isinstance(value, int | float) and math.isfinite(value)
+            not isinstance(value, bool)
+            and isinstance(value, int | float)
+            and math.isfinite(value)
         )
     except OverflowError:
         valid = False
@@ -75,7 +77,9 @@ def evaluate(metric: str, value: float | None, limit: Limit) -> LimitResult:
             margins.append(limit.upper - limit.guard_band - value)
         margin = min(margins)
         verdict = Verdict.PASS if margin >= 0 else Verdict.FAIL
-    return LimitResult(metric, value, limit.lower, limit.upper, limit.guard_band, margin, verdict)
+    return LimitResult(
+        metric, value, limit.lower, limit.upper, limit.guard_band, margin, verdict
+    )
 
 
 @dataclass(frozen=True)
@@ -88,12 +92,19 @@ class Observation:
     unavailable_reason: str | None = None
 
     def __post_init__(self) -> None:
-        for name in ("frequency_hz", "generator_power_dbm", "noise_dbm", "bandwidth_hz"):
+        for name in (
+            "frequency_hz",
+            "generator_power_dbm",
+            "noise_dbm",
+            "bandwidth_hz",
+        ):
             finite(name, getattr(self, name))
         if self.carrier_dbm is not None:
             finite("carrier_dbm", self.carrier_dbm)
         if self.frequency_hz <= 0 or self.bandwidth_hz <= 0:
-            raise ConfigurationError("observation frequency and bandwidth must be positive")
+            raise ConfigurationError(
+                "observation frequency and bandwidth must be positive"
+            )
 
 
 @dataclass(frozen=True)

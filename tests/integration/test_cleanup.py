@@ -9,7 +9,9 @@ from rf_test_sim.simulation.bench import SimulationBench
 pytestmark = pytest.mark.sim
 
 
-def test_partial_setup_attempts_rf_off_and_closes_every_resource(monkeypatch: Any) -> None:
+def test_partial_setup_attempts_rf_off_and_closes_every_resource(
+    monkeypatch: Any,
+) -> None:
     events: list[str] = []
 
     class Resource:
@@ -19,7 +21,11 @@ def test_partial_setup_attempts_rf_off_and_closes_every_resource(monkeypatch: An
         def query(self, command: str) -> str:
             events.append(f"{self.name}:{command}")
             if command == "*IDN?":
-                return "RF-SIM,GENERATOR,1,1" if self.name == "generator" else "WRONG,MODEL,1,1"
+                return (
+                    "RF-SIM,GENERATOR,1,1"
+                    if self.name == "generator"
+                    else "WRONG,MODEL,1,1"
+                )
             return "OK"
 
         def close(self) -> None:
@@ -32,7 +38,9 @@ def test_partial_setup_attempts_rf_off_and_closes_every_resource(monkeypatch: An
         def close(self) -> None:
             events.append("close:manager")
 
-    monkeypatch.setattr("rf_test_sim.simulation.bench.pyvisa.ResourceManager", lambda _: Manager())
+    monkeypatch.setattr(
+        "rf_test_sim.simulation.bench.pyvisa.ResourceManager", lambda _: Manager()
+    )
     with pytest.raises(InstrumentError, match="identity"):
         SimulationBench(RunConfig())
     assert "generator:OUTP 0" in events

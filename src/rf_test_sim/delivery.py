@@ -47,22 +47,32 @@ def deliver(
     except Exception as error:
         status["persistence"] = "ERROR"
         status["report"] = "NOT_GENERATED"
-        status["errors"].append({"type": type(error).__name__, "message": "persistence failed"})
+        status["errors"].append(
+            {"type": type(error).__name__, "message": "persistence failed"}
+        )
     finally:
         if repository is not None:
             try:
                 repository.close()
             except Exception as error:
                 status["persistence"] = "ERROR"
-                status["errors"].append({"type": type(error).__name__, "message": "close failed"})
+                status["errors"].append(
+                    {"type": type(error).__name__, "message": "close failed"}
+                )
     if status["persistence"] != "ERROR":
         try:
             renderer(saved, output, source)
             status["report"] = "GENERATED"
         except Exception as error:
             status["report"] = "ERROR"
-            status["errors"].append({"type": type(error).__name__, "message": "report failed"})
+            status["errors"].append(
+                {"type": type(error).__name__, "message": "report failed"}
+            )
     atomic_json(status_path, status)
     return DeliveryResult(
-        artifact, status_path, status["persistence"], status["report"], tuple(status["errors"])
+        artifact,
+        status_path,
+        status["persistence"],
+        status["report"],
+        tuple(status["errors"]),
     )

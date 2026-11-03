@@ -21,7 +21,9 @@ def test_independent_thermal_reference() -> None:
     reading = simulate(ModelConfig(), 1e9, -30, 1e6)
     assert reading.carrier_dbm == -10
     assert reading.noise_dbm == pytest.approx(-88.975187, abs=0.00001)
-    assert reading.carrier_dbm - reading.noise_dbm == pytest.approx(78.975187, abs=0.00001)
+    assert reading.carrier_dbm - reading.noise_dbm == pytest.approx(
+        78.975187, abs=0.00001
+    )
 
 
 def test_tenfold_bandwidth_adds_ten_db_noise() -> None:
@@ -37,7 +39,7 @@ def test_cable_noise_and_corrected_gain() -> None:
     assert reading.carrier_dbm == -15
     assert reading.carrier_dbm + 3 - (-30 - 2) == 20
     expected_watts = (
-        1.380649e-23 * 290 * 1e6 * 100 * 10** 0.5 * 10** -0.3
+        1.380649e-23 * 290 * 1e6 * 100 * 10**0.5 * 10**-0.3
         + 1.380649e-23 * 290 * 1e6 * (1 - 10**-0.3)
     )
     assert reading.noise_dbm == pytest.approx(10 * math.log10(expected_watts) + 30)
@@ -45,7 +47,9 @@ def test_cable_noise_and_corrected_gain() -> None:
 
 def test_analyzer_noise_added_in_linear_power() -> None:
     ideal = simulate(ModelConfig(), 1e9, -30, 1e6)
-    noisy = simulate(ModelConfig(analyzer_noise_dbm_hz=ideal.noise_dbm - 60), 1e9, -30, 1e6)
+    noisy = simulate(
+        ModelConfig(analyzer_noise_dbm_hz=ideal.noise_dbm - 60), 1e9, -30, 1e6
+    )
     assert noisy.noise_dbm - ideal.noise_dbm == pytest.approx(3.01029995664)
 
 
@@ -83,7 +87,9 @@ def test_outside_linear_range() -> None:
         (float("nan"), Verdict.NOT_EVALUATED),
     ],
 )
-def test_inclusive_limits_without_rounding(value: float | None, verdict: Verdict) -> None:
+def test_inclusive_limits_without_rounding(
+    value: float | None, verdict: Verdict
+) -> None:
     assert evaluate("gain", value, Limit(19, 21)).verdict == verdict
 
 

@@ -4,7 +4,11 @@ from typing import Any
 
 from jinja2 import Environment, StrictUndefined
 
-from rf_test_sim.persistence.artifacts import atomic_json, atomic_text, validate_document
+from rf_test_sim.persistence.artifacts import (
+    atomic_json,
+    atomic_text,
+    validate_document,
+)
 
 
 def sweep_series(document: dict[str, Any]) -> list[dict[str, Any]]:
@@ -12,7 +16,11 @@ def sweep_series(document: dict[str, Any]) -> list[dict[str, Any]]:
     powers = sorted({point["generator_power_dbm"] for point in document["points"]})
     for power in powers:
         points = sorted(
-            (point for point in document["points"] if point["generator_power_dbm"] == power),
+            (
+                point
+                for point in document["points"]
+                if point["generator_power_dbm"] == power
+            ),
             key=lambda point: point["frequency_hz"],
         )
         for metric in ("gain_db", "snr_db"):
@@ -46,7 +54,9 @@ def render(document: dict[str, Any], output: Path, source: str) -> tuple[Path, P
     document = validate_document(document)
     environment = Environment(autoescape=True, undefined=StrictUndefined)
     template = environment.from_string(
-        files("rf_test_sim").joinpath("reporting/templates/run.html").read_text(encoding="utf-8")
+        files("rf_test_sim")
+        .joinpath("reporting/templates/run.html")
+        .read_text(encoding="utf-8")
     )
     html = template.render(run=document, source=source, series=sweep_series(document))
     stem = f"{document['run_id']}.report"

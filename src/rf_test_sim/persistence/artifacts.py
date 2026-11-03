@@ -57,7 +57,10 @@ def validate_document(document: dict[str, Any]) -> dict[str, Any]:
         expected_hash = hashlib.sha256(
             json.dumps(normalized["config"], sort_keys=True).encode()
         ).hexdigest()
-        if normalized["config_hash"] != expected_hash or normalized["dut_id"] != config.dut_id:
+        if (
+            normalized["config_hash"] != expected_hash
+            or normalized["dut_id"] != config.dut_id
+        ):
             raise ValueError("configuration provenance mismatch")
         for name in ("started_at", "finished_at"):
             if datetime.fromisoformat(normalized[name]).utcoffset() is None:

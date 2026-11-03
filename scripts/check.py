@@ -22,7 +22,16 @@ def main() -> int:
             "acceptance",
             "scripts",
         ],
-        [sys.executable, "-m", "ruff", "check", "src", "tests", "acceptance", "scripts"],
+        [
+            sys.executable,
+            "-m",
+            "ruff",
+            "check",
+            "src",
+            "tests",
+            "acceptance",
+            "scripts",
+        ],
         [sys.executable, "-m", "mypy", "--cache-dir=/tmp/rf-mypy", "src"],
         [
             sys.executable,

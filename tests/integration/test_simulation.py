@@ -22,7 +22,9 @@ def test_generator_changes_propagate_to_analyzer(bench: SimulationBench) -> None
 
 
 @pytest.mark.parametrize("power,carrier", [(-21, -1), (-20, 0), (-19, 1)])
-def test_single_digit_carrier_powers(bench: SimulationBench, power: float, carrier: float) -> None:
+def test_single_digit_carrier_powers(
+    bench: SimulationBench, power: float, carrier: float
+) -> None:
     assert bench.measure(1e9, power).carrier_dbm == carrier
 
 
@@ -56,7 +58,9 @@ def test_independent_simulators_and_close(bench: SimulationBench) -> None:
         (ModelConfig(noise_figure_db=20), Verdict.FAIL),
     ],
 )
-def test_dut_outcomes_are_software_regressions(model: ModelConfig, verdict: Verdict) -> None:
+def test_dut_outcomes_are_software_regressions(
+    model: ModelConfig, verdict: Verdict
+) -> None:
     result = execute(replace(RunConfig(), model=model), SimulationBench)
     assert result.execution == Execution.COMPLETED
     assert result.verdict == verdict
@@ -76,7 +80,9 @@ def test_unknown_scpi_is_rejected(bench: SimulationBench) -> None:
         bench.generator.query("UNKNOWN?")
 
 
-def test_configuration_failure_does_not_leave_stale_measurement(bench: SimulationBench) -> None:
+def test_configuration_failure_does_not_leave_stale_measurement(
+    bench: SimulationBench,
+) -> None:
     bench.measure(1e9, -30)
     with pytest.raises(InstrumentError):
         bench.measure(2e12, -30)

@@ -14,7 +14,9 @@ pytestmark = pytest.mark.acceptance
 
 
 def test_configured_dut_meets_limits() -> None:
-    config = load_config(Path(os.environ.get("RF_ACCEPTANCE_CONFIG", "configs/demo.yaml")))
+    config = load_config(
+        Path(os.environ.get("RF_ACCEPTANCE_CONFIG", "configs/demo.yaml"))
+    )
     result = execute(config, SimulationBench)
     assert result.execution == Execution.COMPLETED, result.errors
     assert result.verdict == Verdict.PASS, result.points

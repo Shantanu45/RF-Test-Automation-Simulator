@@ -1,4 +1,5 @@
 """Think of it as the person operating the laboratory equipment: connecting instruments, choosing settings, taking readings, and switching everything off afterward"""
+
 import logging
 import shutil
 import tempfile
@@ -26,16 +27,20 @@ Configures the spectrum analyzer
 Uses rf_model.py to predict the signal and noise
 Returns the analyzer readings
 """
+
+
 class SimulationBench:
-    #It stores the configuration and prepares cleanup trackin
+    # It stores the configuration and prepares cleanup trackin
     def __init__(self, config: RunConfig) -> None:
         self.config = config
-        self._stack = ExitStack()       #ExitStack is a cleanup organizer
+        self._stack = ExitStack()  # ExitStack is a cleanup organizer
         self._closed = False
         self._output_disable_attempted = False
         self._cleanup_errors: list[dict[str, str]] = []
         try:
-            temporary = self._stack.enter_context(tempfile.TemporaryDirectory(prefix="rf-bench-"))
+            temporary = self._stack.enter_context(
+                tempfile.TemporaryDirectory(prefix="rf-bench-")
+            )
             resource = files("rf_test_sim").joinpath("simulation/instruments.yaml")
             with as_file(resource) as source:
                 definition = Path(temporary) / "instruments.yaml"
@@ -78,14 +83,19 @@ class SimulationBench:
             self._stack.close()
         except Exception as error:
             self._cleanup_errors.append(
-                {"type": type(error).__name__, "message": "bench context cleanup failed"}
+                {
+                    "type": type(error).__name__,
+                    "message": "bench context cleanup failed",
+                }
             )
 
     def _close_resource(self, resource: Any) -> None:
         try:
             resource.close()
         except Exception as error:
-            self._cleanup_errors.append({"type": type(error).__name__, "message": "close failed"})
+            self._cleanup_errors.append(
+                {"type": type(error).__name__, "message": "close failed"}
+            )
 
     def _disable_output(self) -> None:
         if self._output_disable_attempted:
@@ -94,14 +104,19 @@ class SimulationBench:
         try:
             self.generator.output(False)
         except Exception as error:
-            self._cleanup_errors.append({"type": type(error).__name__, "message": "RF off failed"})
+            self._cleanup_errors.append(
+                {"type": type(error).__name__, "message": "RF off failed"}
+            )
 
-    #identify the instruments
+    # identify the instruments
     @property
     def identities(self) -> dict[str, str]:
-        return {"generator": self.generator.identity, "analyzer": self.analyzer.identity}
+        return {
+            "generator": self.generator.identity,
+            "analyzer": self.analyzer.identity,
+        }
 
-    #take a reading using the current settings
+    # take a reading using the current settings
     def acquire(self) -> Observation:
         if self._closed:
             raise InstrumentError("bench is closed")
@@ -111,7 +126,7 @@ class SimulationBench:
         if abs(frequency - center) > span / 2:
             raise InstrumentError("carrier outside analyzer span")
 
-        #Calculate the simulated physical response
+        # Calculate the simulated physical response
         reading = simulate(self.config.model, frequency, power, bandwidth, enabled)
         self.control.load(reading)
         self.analyzer.trigger()
@@ -125,19 +140,26 @@ class SimulationBench:
             None if carrier is not None else "generator RF output is disabled",
         )
 
-    #perform a measurement at requested settings
+    # perform a measurement at requested settings
     def measure(self, frequency_hz: float, power_dbm: float) -> Observation:
         if self._closed:
             raise InstrumentError("bench is closed")
         self.control.invalidate()
         self.generator.configure(frequency_hz, power_dbm)
         self.generator.output(True)
-        self.analyzer.configure(frequency_hz, self.config.span_hz, self.config.bandwidth_hz)
+        self.analyzer.configure(
+            frequency_hz, self.config.span_hz, self.config.bandwidth_hz
+        )
         result = self.acquire()
-        if result.frequency_hz != frequency_hz or result.generator_power_dbm != power_dbm:
+        if (
+            result.frequency_hz != frequency_hz
+            or result.generator_power_dbm != power_dbm
+        ):
             raise InstrumentError("generator readback differs from requested settings")
         if result.bandwidth_hz != self.config.bandwidth_hz:
-            raise InstrumentError("analyzer bandwidth readback differs from configuration")
+            raise InstrumentError(
+                "analyzer bandwidth readback differs from configuration"
+            )
         return result
 
     def close(self) -> list[dict[str, str]]:

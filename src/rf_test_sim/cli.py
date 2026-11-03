@@ -54,7 +54,9 @@ def main(arguments: Sequence[str] | None = None) -> int:
         if not options.offline:
 
             def mongo_repository() -> RunRepository:
-                return MongoRepository(uri or "", os.environ.get("MONGODB_DATABASE", "rf_sim"))
+                return MongoRepository(
+                    uri or "", os.environ.get("MONGODB_DATABASE", "rf_sim")
+                )
 
             factory = mongo_repository
         result = deliver(document, options.output, factory)

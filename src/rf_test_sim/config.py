@@ -16,7 +16,9 @@ def construct(record_type: type[ConfigType], values: Any) -> ConfigType:
         raise TypeError("configuration record must be a dataclass")
     allowed = {item.name for item in fields(record_type)}
     if set(values) - allowed:
-        raise ConfigurationError(f"unknown {record_type.__name__} keys: {set(values) - allowed}")
+        raise ConfigurationError(
+            f"unknown {record_type.__name__} keys: {set(values) - allowed}"
+        )
     try:
         return cast(ConfigType, record_type(**values))
     except TypeError as error:
@@ -50,11 +52,18 @@ class ModelConfig:
             raise ConfigurationError("invalid frequency range")
         if not -200 <= self.input_min_dbm <= self.input_max_dbm <= 100:
             raise ConfigurationError("invalid linear input power range")
-        if not 0 < self.temperature_k <= 10000 or not 0 < self.source_temperature_k <= 10000:
-            raise ConfigurationError("temperatures must be within 0..10000 K, excluding zero")
+        if (
+            not 0 < self.temperature_k <= 10000
+            or not 0 < self.source_temperature_k <= 10000
+        ):
+            raise ConfigurationError(
+                "temperatures must be within 0..10000 K, excluding zero"
+            )
         if self.analyzer_noise_dbm_hz is not None:
             if not -300 <= self.analyzer_noise_dbm_hz <= 0:
-                raise ConfigurationError("analyzer noise density must be within -300..0 dBm/Hz")
+                raise ConfigurationError(
+                    "analyzer noise density must be within -300..0 dBm/Hz"
+                )
 
 
 @dataclass(frozen=True)
@@ -72,7 +81,9 @@ class VisaConfig:
             "TCPIP::generator::INSTR",
             "TCPIP::analyzer::INSTR",
         ):
-            raise ConfigurationError("only the packaged simulator resources are supported")
+            raise ConfigurationError(
+                "only the packaged simulator resources are supported"
+            )
         if self.read_termination != "\n" or self.write_termination != "\n":
             raise ConfigurationError("packaged simulator requires newline terminators")
 
@@ -104,7 +115,11 @@ class RunConfig:
             raise ConfigurationError("sweep exceeds the 10000 point document limit")
         for frequency in self.frequencies_hz:
             finite("frequency_hz", frequency)
-            if not self.model.frequency_min_hz <= frequency <= self.model.frequency_max_hz:
+            if (
+                not self.model.frequency_min_hz
+                <= frequency
+                <= self.model.frequency_max_hz
+            ):
                 raise ConfigurationError("frequency outside model range")
         for power in self.powers_dbm:
             finite("power_dbm", power)

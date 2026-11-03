@@ -9,7 +9,11 @@ class SpectrumAnalyzer(ScpiInstrument):
         self.set_value(f"BAND {bandwidth_hz:.11e}")
 
     def settings(self) -> tuple[float, float, float]:
-        return self.number("FREQ:CENT?"), self.number("FREQ:SPAN?"), self.number("BAND?")
+        return (
+            self.number("FREQ:CENT?"),
+            self.number("FREQ:SPAN?"),
+            self.number("BAND?"),
+        )
 
     def trigger(self) -> None:
         if self.query("INIT") != "OK" or not self.flag("*OPC?"):

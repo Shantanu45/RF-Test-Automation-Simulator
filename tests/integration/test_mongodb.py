@@ -18,7 +18,9 @@ pytestmark = pytest.mark.mongo
 def repository() -> Iterator[MongoRepository]:
     uri = os.environ.get("TEST_MONGODB_URI")
     if not uri:
-        pytest.skip("set TEST_MONGODB_URI to explicitly enable disposable database tests")
+        pytest.skip(
+            "set TEST_MONGODB_URI to explicitly enable disposable database tests"
+        )
     database = f"rf_sim_test_{uuid4().hex}"
     instance = MongoRepository(uri, database)
     try:

@@ -38,7 +38,9 @@ class MongoRepository:
             if self.load(document["run_id"]) != document:
                 raise StorageError("run ID already contains different results")
         except PyMongoError as error:
-            raise StorageError("MongoDB save failed; local artifact retained") from error
+            raise StorageError(
+                "MongoDB save failed; local artifact retained"
+            ) from error
 
     def load(self, run_id: str) -> dict[str, Any]:
         try:
